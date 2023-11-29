@@ -12,13 +12,12 @@ app.use(bodyParser.urlencoded({extended : false}))
 app.use(bodyParser.json())
 app.use(cors())
 
-mongoose.connect(process.env.MONGODB).then(()=>{
-    console.log("database connected successfully")
-}).catch((err)=>{
-    console.log(err)
-})
-
-app.listen(3000, ()=>{
+app.listen(3000,async ()=>{
+    await mongoose.connect(process.env.MONGODB).then(()=>{
+        console.log("database connected successfully")
+    }).catch((err)=>{
+        console.log(err)
+    })
     console.log('server is running successfully on port 3000!')
 })
 
