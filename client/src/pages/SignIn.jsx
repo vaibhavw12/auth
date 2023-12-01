@@ -1,30 +1,50 @@
 import React, { useState } from 'react'
 import {Link, useNavigate} from 'react-router-dom'
 import axios from 'axios'
+import { signInStart, signInSuccess, signInFailure, signInprogress } from '../redux/user/userSlice'
+import { useDispatch, useSelector } from 'react-redux'
 
 export default function SignIn() {
 
   const navigate = useNavigate()
+  const dispatch = useDispatch()
+
   const [formData, setFormData] = useState({})
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
+  // const [error, setError] = useState('')
+  // const [loading, setLoading] = useState(false)
+  // name of the slice is user in userSlice.js
+  const {loading, error} = useSelector((state)=> state.user)
+  
 
   const handleChange = (e)=>{
     setFormData({...formData, [e.target.id] : e.target.value})
-    setError('')
+    // setError('')
+    dispatch(signInprogress())
   }
   const handelSubmit = async(e)=>{
     e.preventDefault()
-    setLoading(true)
-    const res =  await axios.post('http://localhost:3000/api/auth/signin',formData)
-    console.log(res.data)
-    navigate('/')
-    if(res.data.status === 'FAILED'){
-      setError('something went wrong')
-    }else{
-      setError('')
+    // setLoading(true)
+    // by using redux
+    dispatch(signInStart())
+    try{
+      const res =  await axios.post('http://localhost:3000/api/auth/signin',formData)
+      // console.log(res.data)
+  
+      if(res.data.status === 'FAILED'){
+        // setError('something went wrong')
+        dispatch(signInFailure(res.data.message))
+      }else{
+        // setError('')
+        // dispatch(signInFailure())
+        dispatch(signInSuccess(res.data))
+        navigate('/')
+      }
+    }catch(err){
+      // console.log(err)
+      dispatch(signInFailure(err.message))
     }
-    setLoading(false)
+    
+    // setLoading(false)
   }
   return (
     <div className='p-3 max-w-lg mx-auto'>
